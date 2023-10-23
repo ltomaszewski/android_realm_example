@@ -19,19 +19,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import io.realm.kotlin.Realm
-import io.realm.kotlin.ext.query
 
 @Composable
-fun CRUDScreen(realm: Realm) {
+fun CRUDScreen(database: Database) {
     var allItems by remember { mutableStateOf<List<Item>>(emptyList()) }
 
     LaunchedEffect(Unit) {
-        val query = realm.query<Item>().find()
-
-        query.asFlow()
+        database
+            .allItems()
+            .asFlow()
             .collect { results ->
-                allItems = realm.copyFromRealm(results.list)
+                allItems = database.copyFromDatabase(results.list)
             }
     }
 
@@ -46,9 +44,7 @@ fun CRUDScreen(realm: Realm) {
         ) {
             Button(
                 onClick = {
-                    realm.writeBlocking {
-                        copyToRealm(Item.createRandomItem("exampleOwnerId"))
-                    }
+                    database.saveItem(Item.createRandomItem("exampleOwnerId"))
                 },
                 enabled = true,
                 modifier = Modifier
@@ -61,12 +57,9 @@ fun CRUDScreen(realm: Realm) {
 
             Button(
                 onClick = {
-                    realm.writeBlocking {
-                        val allItems = query<Item>().find()
-                        if (allItems.isNotEmpty()) {
-                            val itemToDelete = allItems.first()
-                            delete(itemToDelete)
-                        }
+                    val allItemstoList = database.allItems().toList()
+                    if (allItemstoList.isNotEmpty()) {
+                        database.deleteItem(allItemstoList.first())
                     }
                 },
                 modifier = Modifier
