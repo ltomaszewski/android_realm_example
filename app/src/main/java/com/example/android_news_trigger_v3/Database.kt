@@ -7,23 +7,29 @@ import io.realm.kotlin.query.RealmResults
 import io.realm.kotlin.types.TypedRealmObject
 
 class Database {
-    private val config = RealmConfiguration.Builder(schema = setOf(Item::class)).build()
+    private val config = RealmConfiguration.Builder(schema = setOf(Notification::class)).build()
     private val realm: Realm = Realm.open(config)
 
-    fun saveItem(item: Item) {
+    fun saveNotification(notification: Notification) {
         realm.writeBlocking {
-            copyToRealm(item)
+            copyToRealm(notification)
         }
     }
 
-    fun deleteItem(item: Item) {
+    fun deleteNotification(notification: Notification) {
         realm.writeBlocking {
-            findLatest(item)?.let { delete(it) }
+            findLatest(notification)?.let { delete(it) }
         }
     }
 
-    fun allItems(): RealmResults<Item> {
-        return realm.query<Item>().find()
+    fun updateNotification(notification: Notification, update: (Notification) -> Unit) {
+        realm.writeBlocking {
+            findLatest(notification)?.let(update)
+        }
+    }
+
+    fun allNotifications(): RealmResults<Notification> {
+        return realm.query<Notification>().find()
     }
 
     fun <T : TypedRealmObject> copyFromDatabase(

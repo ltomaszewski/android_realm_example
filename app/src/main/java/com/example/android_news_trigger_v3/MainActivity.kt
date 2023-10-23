@@ -12,17 +12,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import com.example.android_news_trigger_v3.ui.theme.Android_news_trigger_v3Theme
-import org.json.JSONObject
 
 class MainActivity : ComponentActivity() {
-    data class NotificationData(
-        val packageInfo: String,
-        val ticker: String,
-        val title: String,
-        val text: String,
-        val url: String
-    )
-
     private val database = Database()
     private lateinit var receiver: BroadcastReceiver
 
@@ -32,23 +23,16 @@ class MainActivity : ComponentActivity() {
         receiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
                 intent
-                    .getStringExtra("jsonString")?.also {
-                        val jsonObject = JSONObject(it)
-                        val notificationData = NotificationData(
-                            jsonObject.getString("packageInfo"),
-                            jsonObject.getString("ticker"),
-                            jsonObject.getString("title"),
-                            jsonObject.getString("text"),
-                            jsonObject.getString("url")
-                        )
-                        database.saveItem(Item(notificationData.text))
+                    .getStringExtra(ContentType.JSON.value)?.also {
+                        val notificationDTO = NotificationDTO.fromJson(it)
+                        val notification = Notification.fromDto(notificationDTO)
+                        database.saveNotification(notification)
                     }
             }
         }
 
-        // Register the receiver to listen for "update-ui-event" broadcasts
-        val filter = IntentFilter("test-event")
-        registerReceiver(receiver, filter)
+        val notificationFilter = IntentFilter(EventType.NOTIFICATION.value)
+        registerReceiver(receiver, notificationFilter)
 
         setContent {
             Android_news_trigger_v3Theme {

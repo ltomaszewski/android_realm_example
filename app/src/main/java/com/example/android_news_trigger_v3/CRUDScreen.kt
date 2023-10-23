@@ -2,11 +2,13 @@ package com.example.android_news_trigger_v3
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
@@ -22,14 +24,14 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun CRUDScreen(database: Database) {
-    var allItems by remember { mutableStateOf<List<Item>>(emptyList()) }
+    var notifications by remember { mutableStateOf<List<Notification>>(emptyList()) }
 
     LaunchedEffect(Unit) {
         database
-            .allItems()
+            .allNotifications()
             .asFlow()
             .collect { results ->
-                allItems = database.copyFromDatabase(results.list)
+                notifications = database.copyFromDatabase(results.list)
             }
     }
 
@@ -44,7 +46,9 @@ fun CRUDScreen(database: Database) {
         ) {
             Button(
                 onClick = {
-                    database.saveItem(Item.createRandomItem("exampleOwnerId"))
+                    val dto = NotificationDTO.createRandomNotification()
+                    val notification = Notification.fromDto(dto)
+                    database.saveNotification(notification)
                 },
                 enabled = true,
                 modifier = Modifier
@@ -57,10 +61,11 @@ fun CRUDScreen(database: Database) {
 
             Button(
                 onClick = {
-                    val allItemstoList = database.allItems().toList()
-                    if (allItemstoList.isNotEmpty()) {
-                        database.deleteItem(allItemstoList.first())
-                    }
+                    database.allNotifications()
+                        .last()
+                        .let {
+                            database.deleteNotification(it)
+                        }
                 },
                 modifier = Modifier
                     .weight(1f)
@@ -73,17 +78,32 @@ fun CRUDScreen(database: Database) {
 
         // Display the list of all items
         LazyColumn {
-            items(allItems.size) { index ->
-                val item = allItems[index]
+            items(notifications.size) { index ->
+                val notification = notifications[index]
                 Column(
                     modifier = Modifier
                         .padding(8.dp)
                         .fillMaxWidth()
-                        .background(color = if (index % 2 == 0) Color.Blue else Color.Red)
+                        .background(color = if (index % 2 == 0) Color.Black.copy(alpha = 0.2F) else Color.White)
                         .padding(16.dp)
                 ) {
-                    Text(text = item._id.toString(), modifier = Modifier.padding(8.dp))
-                    Text(text = item.owner_id, modifier = Modifier.padding(8.dp))
+                    Text(
+                        text = "ID: ${notification._id.toString()}",
+                        modifier = Modifier.padding(8.dp)
+                    )
+                    Text(
+                        text = "Package Info: ${notification.packageInfo}",
+                        modifier = Modifier.padding(8.dp)
+                    )
+                    Text(text = "Ticker: ${notification.ticker}", modifier = Modifier.padding(8.dp))
+                    Text(text = "Title: ${notification.title}", modifier = Modifier.padding(8.dp))
+                    Text(text = "Text: ${notification.text}", modifier = Modifier.padding(8.dp))
+                    Text(text = "URL: ${notification.url}", modifier = Modifier.padding(8.dp))
+                    Box(
+                        modifier = Modifier
+                            .size(20.dp)
+                            .background(if (notification.uploaded) Color.Green else Color.Red)
+                    )
                 }
             }
         }
