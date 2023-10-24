@@ -62,9 +62,9 @@ fun CRUDScreen(database: Database) {
             Button(
                 onClick = {
                     database.allNotifications()
-                        .last()
+                        .lastOrNull { true }
                         .let {
-                            database.deleteNotification(it)
+                            it?.let { database.deleteNotification(it) }
                         }
                 },
                 modifier = Modifier

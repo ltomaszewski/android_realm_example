@@ -11,7 +11,7 @@ class Database {
         .schemaVersion(2)
         .build()
     private val realm: Realm = Realm.open(config)
-    private val backgroundRealm = Realm.open(config)
+
 
     fun saveNotification(notification: Notification) {
         realm.writeBlocking {
@@ -26,17 +26,20 @@ class Database {
     }
 
     fun updateNotification(notification: Notification, update: (Notification) -> Unit) {
+        val realm = Realm.open(config)
         realm.writeBlocking {
-            findLatest(notification)?.let(update)
+            val manageNotification = query<Notification>("_id = $0", notification._id).find()
+            manageNotification.toList().first().let(update)
         }
+        realm.close()
     }
 
     fun allNotifications(): RealmResults<Notification> {
         return realm.query<Notification>().find()
     }
 
-    fun allNotificationsForBackground(): RealmResults<Notification> {
-        return backgroundRealm.query<Notification>().find()
+    fun allNotificationsNotUploadedForBackground(): RealmResults<Notification> {
+        return realm.query<Notification>("uploaded = false").find()
     }
 
     fun <T : TypedRealmObject> copyFromDatabase(

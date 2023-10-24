@@ -15,6 +15,7 @@ import com.example.android_news_trigger_v3.ui.theme.Android_news_trigger_v3Theme
 
 class MainActivity : ComponentActivity() {
     private val database = Database()
+    private val notificationUploader = NotificationUploader(database)
     private lateinit var receiver: NotificationReceiver
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,6 +35,7 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+        notificationUploader.scheduleUpload()
     }
 
     override fun onDestroy() {

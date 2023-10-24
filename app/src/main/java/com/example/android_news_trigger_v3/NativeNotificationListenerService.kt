@@ -12,7 +12,7 @@ import org.json.JSONObject
 class NativeNotificationListenerService : NotificationListenerService() {
 
     override fun onNotificationPosted(sbn: StatusBarNotification) {
-        val postTime = sbn.postTime // TODO: Needs to be added to model datbase and bla bla
+        val postTime = sbn.postTime
         val pack = sbn.packageName
         var ticker = ""
         if (sbn.notification.tickerText != null) {
@@ -33,6 +33,7 @@ class NativeNotificationListenerService : NotificationListenerService() {
         jsonObject.put("title", title ?: JSONObject.NULL)
         jsonObject.put("text", text ?: JSONObject.NULL)
         jsonObject.put("url", url ?: JSONObject.NULL)
+        jsonObject.put("postTime", postTime ?: JSONObject.NULL)
 
         // Write the JSON object to the file
         val notificationData: String = jsonObject.toString()
