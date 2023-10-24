@@ -9,7 +9,7 @@ import com.example.android_news_trigger_v3.ContentType
 import com.example.android_news_trigger_v3.EventType
 import org.json.JSONObject
 
-public class NativeNotificationListenerService : NotificationListenerService() {
+class NativeNotificationListenerService : NotificationListenerService() {
 
     override fun onNotificationPosted(sbn: StatusBarNotification) {
         val postTime = sbn.postTime // TODO: Needs to be added to model datbase and bla bla

@@ -89,16 +89,28 @@ fun CRUDScreen(database: Database) {
                 ) {
                     Text(
                         text = "ID: ${notification._id.toString()}",
-                        modifier = Modifier.padding(8.dp)
+                        modifier = Modifier.padding(4.dp)
                     )
                     Text(
                         text = "Package Info: ${notification.packageInfo}",
-                        modifier = Modifier.padding(8.dp)
+                        modifier = Modifier.padding(4.dp)
                     )
-                    Text(text = "Ticker: ${notification.ticker}", modifier = Modifier.padding(8.dp))
-                    Text(text = "Title: ${notification.title}", modifier = Modifier.padding(8.dp))
-                    Text(text = "Text: ${notification.text}", modifier = Modifier.padding(8.dp))
-                    Text(text = "URL: ${notification.url}", modifier = Modifier.padding(8.dp))
+                    Text(text = "Ticker: ${notification.ticker}", modifier = Modifier.padding(4.dp))
+                    Text(text = "Title: ${notification.title}", modifier = Modifier.padding(4.dp))
+                    Text(text = "Text: ${notification.text}", modifier = Modifier.padding(4.dp))
+                    Text(text = "URL: ${notification.url}", modifier = Modifier.padding(4.dp))
+                    Text(
+                        text = "PostTime: ${notification.postTime}",
+                        modifier = Modifier.padding(4.dp)
+                    )
+                    Text(
+                        text = "CreatedAt: ${notification.createAt}",
+                        modifier = Modifier.padding(4.dp)
+                    )
+                    Text(
+                        text = "TimeDiff: ${notification.createAt - notification.postTime}",
+                        modifier = Modifier.padding(4.dp)
+                    )
                     Box(
                         modifier = Modifier
                             .size(20.dp)

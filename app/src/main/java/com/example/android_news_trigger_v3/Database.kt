@@ -7,8 +7,11 @@ import io.realm.kotlin.query.RealmResults
 import io.realm.kotlin.types.TypedRealmObject
 
 class Database {
-    private val config = RealmConfiguration.Builder(schema = setOf(Notification::class)).build()
+    private val config = RealmConfiguration.Builder(schema = setOf(Notification::class))
+        .schemaVersion(2)
+        .build()
     private val realm: Realm = Realm.open(config)
+    private val backgroundRealm = Realm.open(config)
 
     fun saveNotification(notification: Notification) {
         realm.writeBlocking {
@@ -30,6 +33,10 @@ class Database {
 
     fun allNotifications(): RealmResults<Notification> {
         return realm.query<Notification>().find()
+    }
+
+    fun allNotificationsForBackground(): RealmResults<Notification> {
+        return backgroundRealm.query<Notification>().find()
     }
 
     fun <T : TypedRealmObject> copyFromDatabase(

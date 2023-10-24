@@ -15,22 +15,12 @@ import com.example.android_news_trigger_v3.ui.theme.Android_news_trigger_v3Theme
 
 class MainActivity : ComponentActivity() {
     private val database = Database()
-    private lateinit var receiver: BroadcastReceiver
+    private lateinit var receiver: NotificationReceiver
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        receiver = object : BroadcastReceiver() {
-            override fun onReceive(context: Context, intent: Intent) {
-                intent
-                    .getStringExtra(ContentType.JSON.value)?.also {
-                        val notificationDTO = NotificationDTO.fromJson(it)
-                        val notification = Notification.fromDto(notificationDTO)
-                        database.saveNotification(notification)
-                    }
-            }
-        }
-
+        receiver = NotificationReceiver(database)
         val notificationFilter = IntentFilter(EventType.NOTIFICATION.value)
         registerReceiver(receiver, notificationFilter)
 
@@ -49,5 +39,16 @@ class MainActivity : ComponentActivity() {
     override fun onDestroy() {
         super.onDestroy()
         database.onDestroy()
+        unregisterReceiver(receiver)
+    }
+}
+
+class NotificationReceiver(private val database: Database) : BroadcastReceiver() {
+    override fun onReceive(context: Context, intent: Intent) {
+        intent.getStringExtra(ContentType.JSON.value)?.also {
+            val notificationDTO = NotificationDTO.fromJson(it)
+            val notification = Notification.fromDto(notificationDTO)
+            database.saveNotification(notification)
+        }
     }
 }

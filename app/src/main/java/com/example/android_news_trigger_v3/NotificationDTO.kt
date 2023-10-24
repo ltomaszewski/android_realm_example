@@ -7,7 +7,8 @@ data class NotificationDTO(
     val ticker: String,
     val title: String,
     val text: String,
-    val url: String
+    val url: String,
+    val postTime: Long
 ) {
     companion object {
         // Factory method to create NotificationData from JSON string
@@ -18,7 +19,8 @@ data class NotificationDTO(
                 jsonObject.getString("ticker"),
                 jsonObject.getString("title"),
                 jsonObject.getString("text"),
-                jsonObject.getString("url")
+                jsonObject.getString("url"),
+                jsonObject.getLong("postTime")
             )
         }
 
@@ -29,13 +31,16 @@ data class NotificationDTO(
             val title = "Random Title"
             val text = "Random Text"
             val url = "https://example.com"
+            val currentTimeMillis = System.currentTimeMillis()
+            val postTime = currentTimeMillis / 1000
 
             return NotificationDTO(
                 packageInfo,
                 ticker,
                 title,
                 text,
-                url
+                url,
+                postTime
             )
         }
     }

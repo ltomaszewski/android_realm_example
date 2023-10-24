@@ -13,6 +13,8 @@ open class Notification : RealmObject {
     var text: String = ""
     var url: String = ""
     var uploaded: Boolean = false
+    var postTime: Long = -1
+    var createAt: Long = -1
 
     constructor() {}
 
@@ -21,13 +23,17 @@ open class Notification : RealmObject {
         ticker: String = "",
         title: String = "",
         text: String = "",
-        url: String = ""
+        url: String = "",
+        postTime: Long = -1
     ) : super() {
         this.packageInfo = packageInfo
         this.ticker = ticker
         this.title = title
         this.text = text
         this.url = url
+        this.postTime = postTime
+        val currentTimeMillis = System.currentTimeMillis()
+        this.createAt = currentTimeMillis / 1000
     }
 
     // Factory method to create Notification from DTO
@@ -38,7 +44,8 @@ open class Notification : RealmObject {
                 ticker = dto.ticker,
                 title = dto.title,
                 text = dto.text,
-                url = dto.url
+                url = dto.url,
+                postTime = dto.postTime
             )
         }
     }
