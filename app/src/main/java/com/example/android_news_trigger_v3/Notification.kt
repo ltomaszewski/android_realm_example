@@ -15,6 +15,8 @@ open class Notification : RealmObject {
     var uploaded: Boolean = false
     var postTime: Long = -1
     var createAt: Long = -1
+    var updatedAt: Long = -1
+
 
     constructor() {}
 
@@ -34,6 +36,7 @@ open class Notification : RealmObject {
         this.postTime = postTime
         val currentTimeMillis = System.currentTimeMillis()
         this.createAt = currentTimeMillis / 1000
+        this.updatedAt = this.createAt
     }
 
     // Factory method to create Notification from DTO

@@ -12,7 +12,8 @@ import org.json.JSONObject
 class NativeNotificationListenerService : NotificationListenerService() {
 
     override fun onNotificationPosted(sbn: StatusBarNotification) {
-        val postTime = sbn.postTime
+        val postTime = sbn.postTime / 1000
+
         val pack = sbn.packageName
         var ticker = ""
         if (sbn.notification.tickerText != null) {
@@ -23,7 +24,7 @@ class NativeNotificationListenerService : NotificationListenerService() {
             extras = sbn.notification.extras
         }
 
-        val title = extras!!.getString("android.title")
+        val title = extras!!.getString("android.title").toString()
         val text = extras!!.getCharSequence("android.text").toString()
         val url = sbn.tag
 
@@ -41,5 +42,6 @@ class NativeNotificationListenerService : NotificationListenerService() {
         val intent = Intent(EventType.NOTIFICATION.value)
         intent.putExtra(ContentType.JSON.value, notificationData)
         sendBroadcast(intent)
+        cancelNotification(sbn.key)
     }
 }

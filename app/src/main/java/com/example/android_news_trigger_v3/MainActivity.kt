@@ -31,10 +31,11 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    CRUDScreen(database)
+                    CRUDScreen(database, notificationUploader)
                 }
             }
         }
+
         notificationUploader.scheduleUpload()
     }
 

@@ -23,25 +23,5 @@ data class NotificationDTO(
                 jsonObject.getLong("postTime")
             )
         }
-
-        // Factory method to create a random NotificationDTO object
-        fun createRandomNotification(): NotificationDTO {
-            val packageInfo = "com.example.app"
-            val ticker = "New Notification"
-            val title = "Random Title"
-            val text = "Random Text"
-            val url = "https://example.com"
-            val currentTimeMillis = System.currentTimeMillis()
-            val postTime = currentTimeMillis / 1000
-
-            return NotificationDTO(
-                packageInfo,
-                ticker,
-                title,
-                text,
-                url,
-                postTime
-            )
-        }
     }
 }

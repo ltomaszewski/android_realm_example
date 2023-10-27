@@ -2,6 +2,7 @@ package com.example.android_news_trigger_v3
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.json.JSONObject
@@ -14,21 +15,28 @@ import java.net.URL
 
 class NotificationUploader(private val database: Database) {
     private val scope = CoroutineScope(Dispatchers.Default)
+    private var hostIp = "192.168.50.103"
 
     fun scheduleUpload() {
         scope.launch {
             database
-                .allNotificationsNotUploadedForBackground()
-                .asFlow()
+                .allNotificationsNotUploaded()
+                .flowOn(Dispatchers.Main)
                 .map {
                     database.copyFromDatabase(it.list)
                 }
                 .collect {
                     it.forEach {
                         uploadNotification(it)
+                        Thread.sleep(20) // For unknown reason the UI is not getting updated due to too frequent updates in database. Simple sleep solve it
                     }
                 }
         }
+    }
+
+    fun updateHostIp(hostIp: String) {
+        this.hostIp = hostIp
+        database.setAllNotificationNotUploaded()
     }
 
     private suspend fun uploadNotification(notification: Notification) {
@@ -42,13 +50,14 @@ class NotificationUploader(private val database: Database) {
         }
 
         val apiUrl =
-            "http://192.168.50.103:696/api/v1/tweet/add"
+            "http://$hostIp:696/api/v1/tweet/add"
 
         val url = URL(apiUrl)
         val connection = url.openConnection() as HttpURLConnection
 
         try {
             connection.requestMethod = "POST"
+            connection.connectTimeout = 1000
             connection.setRequestProperty("Content-Type", "application/json;charset=utf-8")
             connection.doOutput = true
 

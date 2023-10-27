@@ -3,12 +3,14 @@ package com.example.android_news_trigger_v3
 import io.realm.kotlin.Realm
 import io.realm.kotlin.RealmConfiguration
 import io.realm.kotlin.ext.query
-import io.realm.kotlin.query.RealmResults
+import io.realm.kotlin.notifications.ResultsChange
+import io.realm.kotlin.query.Sort
 import io.realm.kotlin.types.TypedRealmObject
+import kotlinx.coroutines.flow.Flow
 
 class Database {
     private val config = RealmConfiguration.Builder(schema = setOf(Notification::class))
-        .schemaVersion(2)
+        .schemaVersion(3)
         .build()
     private val realm: Realm = Realm.open(config)
 
@@ -25,21 +27,48 @@ class Database {
         }
     }
 
+    fun setAllNotificationNotUploaded() {
+        realm.writeBlocking {
+            val allNotifications = query<Notification>().find()
+            for (notification in allNotifications) {
+                notification.uploaded = false
+                val currentTimeMillis = System.currentTimeMillis()
+                notification.updatedAt = currentTimeMillis / 1000
+            }
+        }
+    }
+
+    fun forceReUploadNotUploadedByUpdateUpdatedAt() {
+        realm.writeBlocking {
+            val allNotifications = query<Notification>("uploaded = $0", false).find()
+            for (notification in allNotifications) {
+                val currentTimeMillis = System.currentTimeMillis()
+                notification.updatedAt = currentTimeMillis / 1000
+            }
+        }
+    }
+
     fun updateNotification(notification: Notification, update: (Notification) -> Unit) {
-        val realm = Realm.open(config)
         realm.writeBlocking {
             val manageNotification = query<Notification>("_id = $0", notification._id).find()
-            manageNotification.toList().first().let(update)
+            manageNotification.toList().first().let {
+                update(it)
+                val currentTimeMillis = System.currentTimeMillis()
+                it.updatedAt = currentTimeMillis / 1000
+            }
         }
-        realm.close()
     }
 
-    fun allNotifications(): RealmResults<Notification> {
-        return realm.query<Notification>().find()
+    fun allNotifications(): Flow<ResultsChange<Notification>> {
+        return realm.query<Notification>().sort("postTime", Sort.DESCENDING).asFlow()
     }
 
-    fun allNotificationsNotUploadedForBackground(): RealmResults<Notification> {
-        return realm.query<Notification>("uploaded = false").find()
+    fun allNotificationsNotUploaded(): Flow<ResultsChange<Notification>> {
+        return realm.query<Notification>("uploaded = $0", false).asFlow()
+    }
+
+    fun allNotificationLister() {
+
     }
 
     fun <T : TypedRealmObject> copyFromDatabase(
